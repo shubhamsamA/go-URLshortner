@@ -9,7 +9,7 @@ URLs are stored only **in memory and are not persistent**, so all data will be l
 
 ## Endpoints
 
-### 1. Root
+### 1. Root url https://go-urlshortner.onrender.com/
 **GET /**  
 Returns a simple message: hello world 
 

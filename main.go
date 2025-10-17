@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -51,15 +52,49 @@ func getURL(id string) (URL, error){
 
 }
 
+func rootHandler(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w,"Hello, world!")
+}
+
+func ShortURLHandler(w http.ResponseWriter, r *http.Request){
+	var data struct{
+		URL string `json:"url"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w,"Invalid request boady",http.StatusBadRequest)
+		return
+	}
+	shortURL_:= createURL(data.URL)
+	response := struct{
+		ShortURL string `json:"short_url"`
+	}{ShortURL: shortURL_}
+
+	w.Header().Set("content-type","application/json")
+	json.NewEncoder(w).Encode(response)
+
+}
+
+func redirectURLHandler(w http.ResponseWriter, r *http.Request){
+	id := r.URL.Path[len("/redirect/"):]
+	url, err := getURL(id)
+	if err != nil {
+		http.Error(w,"URL not foumd",http.StatusBadRequest)
+	}
+	http.Redirect(w, r, url.OriginalURL,http.StatusFound)
+}
 func main() {
 	fmt.Println("hello world")
+
+	http.HandleFunc("/", rootHandler)
+	http.HandleFunc("/shorten",ShortURLHandler)
+	http.HandleFunc("/redirect/",redirectURLHandler)
 
 	fmt.Println("Starting server on port 3000...")
 	err := http.ListenAndServe(":3000",nil)
 	if err != nil {
 		fmt.Println("Error starting server:",err)
-		
+
 	}
-
-
 }

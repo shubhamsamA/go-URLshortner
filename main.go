@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -92,9 +93,10 @@ func main() {
 	http.HandleFunc("/redirect/",redirectURLHandler)
 
 	fmt.Println("Starting server on port 3000...")
-	err := http.ListenAndServe(":3000",nil)
-	if err != nil {
-		fmt.Println("Error starting server:",err)
+	port := os.Getenv("PORT")
+if port == "" {
+    port = "3000" // fallback for local testing
+}
+http.ListenAndServe(":"+port, nil)
 
 	}
-}
